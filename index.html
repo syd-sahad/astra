@@ -3,141 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal One-Tap ID Prototype</title>
+    <title>Universal Health ID | Hospital Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .hidden { display: none; }
-        .scan-line {
-            width: 100%;
-            height: 4px;
-            background: #60a5fa;
-            position: absolute;
-            box-shadow: 0 0 15px #60a5fa;
-            animation: scanMove 2s infinite;
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        @keyframes scanMove {
-            0% { top: 0%; }
-            100% { top: 100%; }
+        body {
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
         }
     </style>
 </head>
-<body class="bg-slate-900 text-white font-sans min-h-screen flex items-center justify-center p-4">
+<body class="text-slate-200 min-h-screen flex items-center justify-center p-4">
 
-    <div id="login-screen" class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
-        <div class="text-4xl mb-4">🔐</div>
-        <h2 class="text-2xl font-bold mb-2">Hospital Portal</h2>
-        <p class="text-slate-400 text-sm mb-6">Authorized Personnel Only</p>
-        <input type="password" id="pass-input" placeholder="Access Code" class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 mb-4 focus:border-blue-500 outline-none">
-        <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold transition">Verify Identity</button>
+    <div id="login-screen" class="glass p-10 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+        <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+            <i class="fas fa-shield-halved text-3xl text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold mb-1">Secure Access</h2>
+        <p class="text-slate-400 text-sm mb-8">Hospital Infrastructure v2.1</p>
+        <input type="password" id="site-pass" placeholder="Enter System Key" class="w-full p-4 rounded-xl bg-slate-800/50 border border-slate-700 mb-4 outline-none focus:border-blue-500 transition-all text-center tracking-widest">
+        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold uppercase tracking-wider transition-all active:scale-95">Verify Terminal</button>
     </div>
 
-    <div id="dashboard" class="hidden text-center">
-        <h1 class="text-3xl font-bold mb-2">Emergency Hub</h1>
-        <p class="text-blue-400 mb-8 font-mono uppercase tracking-widest text-sm">System Online</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <button onclick="navTo('upload-screen')" class="p-8 bg-emerald-600 hover:bg-emerald-500 rounded-2xl flex flex-col items-center gap-3 transition-transform hover:scale-105">
-                <span class="text-3xl">📝</span>
-                <span class="font-bold text-lg">Upload Data</span>
+    <div id="main-hub" class="hidden w-full max-w-2xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-light tracking-tight text-white">Universal <span class="font-bold text-blue-500">Emergency ID</span></h1>
+            <p class="text-slate-500 mt-2 uppercase tracking-widest text-xs">Biometric Secure Gateway</p>
+        </header>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <button onclick="showPage('upload-page')" class="glass p-10 rounded-3xl hover:bg-white/10 transition-all group text-left">
+                <div class="w-14 h-14 bg-emerald-500/20 text-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-user-plus text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Upload Data</h3>
+                <p class="text-slate-400 text-sm">Enroll new patient metrics and emergency history into the cloud.</p>
             </button>
-            <button onclick="startBioScan()" class="p-8 bg-blue-600 hover:bg-blue-500 rounded-2xl flex flex-col items-center gap-3 transition-transform hover:scale-105">
-                <span class="text-3xl">👁️</span>
-                <span class="font-bold text-lg">Get Data</span>
+
+            <button onclick="fetchData()" class="glass p-10 rounded-3xl hover:bg-white/10 transition-all group text-left">
+                <div class="w-14 h-14 bg-blue-500/20 text-blue-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-fingerprint text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Get Data</h3>
+                <p class="text-slate-400 text-sm">Access clinical records via instant biometric verification.</p>
             </button>
         </div>
     </div>
 
-    <div id="upload-screen" class="hidden bg-slate-800 p-8 rounded-2xl w-full max-w-md shadow-2xl">
-        <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><span>📥</span> Patient Enrollment</h2>
+    <div id="upload-page" class="hidden glass p-8 rounded-3xl w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3"><i class="fas fa-file-medical text-emerald-500"></i> Patient Enrollment</h2>
         <div class="space-y-4">
-            <input type="text" id="name" placeholder="Full Name" class="w-full p-3 bg-slate-700 rounded-lg outline-none">
-            <input type="text" id="blood" placeholder="Blood Group (e.g. O+)" class="w-full p-3 bg-slate-700 rounded-lg outline-none">
-            <textarea id="allergies" placeholder="Known Allergies / Medical Conditions" class="w-full p-3 bg-slate-700 rounded-lg h-24 outline-none"></textarea>
-            <input type="text" id="contact" placeholder="Emergency Contact Number" class="w-full p-3 bg-slate-700 rounded-lg outline-none">
-            <button onclick="processUpload()" class="w-full bg-emerald-600 py-4 rounded-xl font-bold mt-4 shadow-lg">Save to Secure Cloud</button>
-            <button onclick="navTo('dashboard')" class="w-full text-slate-400 py-2">← Back to Hub</button>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Full Legal Name</label>
+                <input type="text" id="p-name" class="w-full p-4 bg-slate-900/50 rounded-xl border border-slate-700 outline-none focus:border-emerald-500">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Blood Group</label>
+                    <input type="text" id="p-blood" placeholder="e.g. O+" class="w-full p-4 bg-slate-900/50 rounded-xl border border-slate-700 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">ICE Contact</label>
+                    <input type="text" id="p-contact" class="w-full p-4 bg-slate-900/50 rounded-xl border border-slate-700 outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Allergies & Medical Alerts</label>
+                <textarea id="p-meds" class="w-full p-4 bg-slate-900/50 rounded-xl border border-slate-700 outline-none h-28"></textarea>
+            </div>
+            <button onclick="saveData()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold shadow-lg transition-all mt-4">Save to Secure Ledger</button>
+            <button onclick="showPage('main-hub')" class="w-full text-slate-500 text-sm py-2">Return to Dashboard</button>
         </div>
     </div>
 
-    <div id="scan-screen" class="hidden fixed inset-0 bg-slate-900 flex flex-col items-center justify-center">
-        <div class="relative w-64 h-64 border-2 border-blue-500/30 rounded-full flex items-center justify-center mb-8">
-            <div class="scan-line rounded-full"></div>
-            <div class="text-6xl animate-pulse">👁️‍🗨️</div>
-        </div>
-        <h2 id="scan-status" class="text-2xl font-mono text-blue-400 animate-pulse">INITIATING RETINA SCAN...</h2>
-        <p class="text-slate-500 mt-2">Hold device steady at eye level</p>
-    </div>
+    <div id="result-page" class="hidden w-full max-w-md">
+        <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl text-slate-900">
+            <div class="bg-red-600 p-8 text-white">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest">Priority Record</span>
+                    <i class="fas fa-heart-pulse animate-pulse"></i>
+                </div>
+                <h1 id="res-name" class="text-3xl font-bold tracking-tight">---</h1>
+                <p class="opacity-70 text-sm">Verified Medical Identity</p>
+            </div>
+            
+            <div class="p-8">
+                <div class="grid grid-cols-2 gap-8 mb-8">
+                    <div class="border-l-4 border-red-600 pl-4">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blood Type</p>
+                        <p id="res-blood" class="text-3xl font-black">---</p>
+                    </div>
+                    <div class="border-l-4 border-slate-200 pl-4">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ICE Contact</p>
+                        <p id="res-contact" class="text-xl font-bold">---</p>
+                    </div>
+                </div>
 
-    <div id="result-screen" class="hidden bg-white text-slate-900 p-0 rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-        <div class="bg-red-600 p-6 text-white text-center">
-            <p class="text-xs font-black tracking-widest uppercase mb-1">Critical Information</p>
-            <h1 id="res-name" class="text-3xl font-bold">---</h1>
-        </div>
-        <div class="p-8 space-y-6">
-            <div class="flex justify-between border-b pb-4">
-                <div><p class="text-xs text-slate-500 font-bold uppercase">Blood Type</p><p id="res-blood" class="text-2xl font-black text-red-600">---</p></div>
-                <div class="text-right"><p class="text-xs text-slate-500 font-bold uppercase">ICE Contact</p><p id="res-contact" class="font-bold">---</p></div>
+                <div class="bg-slate-50 p-6 rounded-3xl mb-8">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fas fa-triangle-exclamation text-red-500"></i> Critical Alerts
+                    </p>
+                    <p id="res-meds" class="text-slate-700 font-medium leading-relaxed italic">---</p>
+                </div>
+
+                <button onclick="showPage('main-hub')" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold active:scale-95 transition-all">Close Secure View</button>
             </div>
-            <div class="bg-slate-100 p-4 rounded-xl">
-                <p class="text-xs text-slate-500 font-bold uppercase mb-2">Clinical Allergies</p>
-                <p id="res-allergies" class="text-slate-800 font-medium">---</p>
-            </div>
-            <button onclick="navTo('dashboard')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold">Exit Secure View</button>
         </div>
     </div>
 
     <script>
-        // Use "hackathon2026" as your demo password
-        function handleLogin() {
-            const pass = document.getElementById('pass-input').value;
-            if (pass === "hackathon2026") {
-                navTo('dashboard');
-            } else {
-                alert("Unauthorized: Invalid Access Code");
-            }
-        }
-
-        function navTo(screenId) {
-            // Hide all screens
-            ['login-screen', 'dashboard', 'upload-screen', 'scan-screen', 'result-screen'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+        function showPage(id) {
+            ['login-screen', 'main-hub', 'upload-page', 'result-page'].forEach(p => {
+                document.getElementById(p).classList.add('hidden');
             });
-            // Show the target screen
-            document.getElementById(screenId).classList.remove('hidden');
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        function processUpload() {
-            const patient = {
-                name: document.getElementById('name').value,
-                blood: document.getElementById('blood').value,
-                allergies: document.getElementById('allergies').value,
-                contact: document.getElementById('contact').value
+        function login() {
+            const p = document.getElementById('site-pass').value;
+            // Password for demo
+            if(p === "admin123") showPage('main-hub');
+            else alert("Invalid Terminal Key");
+        }
+
+        function saveData() {
+            const data = {
+                name: document.getElementById('p-name').value,
+                blood: document.getElementById('p-blood').value,
+                meds: document.getElementById('p-meds').value,
+                contact: document.getElementById('p-contact').value
             };
-            // Save data to browser memory (Simulates database)
-            localStorage.setItem('hospital_record', JSON.stringify(patient));
-            alert("Success: Record Encrypted and Synced to Hospital Network.");
-            navTo('dashboard');
+            localStorage.setItem('medical_record', JSON.stringify(data));
+            alert("Record Synchronized.");
+            showPage('main-hub');
         }
 
-        function startBioScan() {
-            navTo('scan-screen');
-            // Simulation timing: 2 seconds for fingerprint, 2 seconds for retina
-            setTimeout(() => {
-                document.getElementById('scan-status').innerText = "VERIFYING BIOMETRICS...";
-            }, 2000);
-
-            setTimeout(() => {
-                const data = JSON.parse(localStorage.getItem('hospital_record'));
-                if (data) {
-                    document.getElementById('res-name').innerText = data.name;
-                    document.getElementById('res-blood').innerText = data.blood;
-                    document.getElementById('res-allergies').innerText = data.allergies;
-                    document.getElementById('res-contact').innerText = data.contact;
-                    navTo('result-screen');
-                } else {
-                    alert("No Record Found! Please upload data first.");
-                    navTo('dashboard');
-                }
-            }, 4500);
+        function fetchData() {
+            const stored = localStorage.getItem('medical_record');
+            if(stored) {
+                const data = JSON.parse(stored);
+                document.getElementById('res-name').innerText = data.name;
+                document.getElementById('res-blood').innerText = data.blood;
+                document.getElementById('res-meds').innerText = data.meds;
+                document.getElementById('res-contact').innerText = data.contact;
+                showPage('result-page');
+            } else {
+                alert("No record found on this terminal.");
+            }
         }
     </script>
 </body>
